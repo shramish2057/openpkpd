@@ -35,13 +35,7 @@ pk_state_symbols(::OneCompIVBolus) = [:A_central]
 pk_dose_target_index(::OneCompIVBolus) = 1
 
 function pk_u0(spec::ModelSpec{OneCompIVBolus,OneCompIVBolusParams}, grid::SimGrid)
-    A0 = 0.0
-    for d in spec.doses
-        if d.time == grid.t0
-            A0 += d.amount
-        end
-    end
-    return [A0]
+    return [0.0]
 end
 
 function pk_ode!(du, u, p, t, ::OneCompIVBolus)
@@ -69,13 +63,7 @@ pk_dose_target_index(::OneCompOralFirstOrder) = 1
 function pk_u0(
     spec::ModelSpec{OneCompOralFirstOrder,OneCompOralFirstOrderParams}, grid::SimGrid
 )
-    Agut0 = 0.0
-    for d in spec.doses
-        if d.time == grid.t0
-            Agut0 += d.amount
-        end
-    end
-    return [Agut0, 0.0]
+    return [0.0, 0.0]
 end
 
 function pk_ode!(du, u, p, t, ::OneCompOralFirstOrder)

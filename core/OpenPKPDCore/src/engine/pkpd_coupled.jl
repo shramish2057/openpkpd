@@ -3,15 +3,7 @@ export simulate_pkpd_coupled
 function _preset_dose_callback(
     doses::Vector{DoseEvent}, t0::Float64, t1::Float64, target_index::Int
 )
-    dose_times = Float64[]
-    dose_amounts = Float64[]
-
-    for d in doses
-        if d.time > t0 && d.time <= t1
-            push!(dose_times, d.time)
-            push!(dose_amounts, d.amount)
-        end
-    end
+    _, dose_times, dose_amounts = normalize_doses_for_sim(doses, t0, t1)
 
     if isempty(dose_times)
         return nothing
@@ -65,7 +57,14 @@ function simulate_pkpd_coupled(
     IC50 = pd_spec.params.IC50
 
     # Build initial state vector: [PK states..., R]
+    a0_add, _, _ = normalize_doses_for_sim(pk_spec.doses, grid.t0, grid.t1)
+
     u0_pk = pk_u0(pk_spec, grid)
+
+    # Apply the t0 dose add to the PK dose target index
+    target_index = pk_dose_target_index(pk_spec.kind)
+    u0_pk[target_index] += a0_add
+
     u0 = vcat(u0_pk, [R0])
 
     # Combined parameter tuple (NamedTuple), still pure data
@@ -136,6 +135,7 @@ function simulate_pkpd_coupled(
         "pd_params" =>
             Dict("Kin" => Kin, "Kout" => Kout, "R0" => R0, "Imax" => Imax, "IC50" => IC50),
         "deterministic_output_grid" => true,
+        "event_semantics_version" => EVENT_SEMANTICS_VERSION,
     )
 
     return SimResult(Vector{Float64}(sol.t), states, observations, metadata)

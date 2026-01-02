@@ -46,15 +46,7 @@ function _solver_alg(alg::Symbol)
 end
 
 function _dose_callback(doses::Vector{DoseEvent}, t0::Float64, t1::Float64)
-    dose_times = Float64[]
-    dose_amounts = Float64[]
-
-    for d in doses
-        if d.time > t0 && d.time <= t1
-            push!(dose_times, d.time)
-            push!(dose_amounts, d.amount)
-        end
-    end
+    _, dose_times, dose_amounts = normalize_doses_for_sim(doses, t0, t1)
 
     if isempty(dose_times)
         return nothing
@@ -81,12 +73,8 @@ function simulate(
     CL = spec.params.CL
     V = spec.params.V
 
-    A0 = 0.0
-    for d in spec.doses
-        if d.time == grid.t0
-            A0 += d.amount
-        end
-    end
+    a0_add, _, _ = normalize_doses_for_sim(spec.doses, grid.t0, grid.t1)
+    A0 = a0_add
 
     p = (CL=CL, V=V)
     u0 = [A0]
@@ -120,6 +108,7 @@ function simulate(
         "abstol" => solver.abstol,
         "dose_schedule" => [(d.time, d.amount) for d in spec.doses],
         "deterministic_output_grid" => true,
+        "event_semantics_version" => EVENT_SEMANTICS_VERSION,
     )
 
     return SimResult(Vector{Float64}(sol.t), states, observations, metadata)
@@ -139,12 +128,8 @@ function simulate(
     V = spec.params.V
 
     # Oral bolus doses add to Agut
-    Agut0 = 0.0
-    for d in spec.doses
-        if d.time == grid.t0
-            Agut0 += d.amount
-        end
-    end
+    a0_add, _, _ = normalize_doses_for_sim(spec.doses, grid.t0, grid.t1)
+    Agut0 = a0_add
 
     p = (Ka=Ka, CL=CL, V=V)
     u0 = [Agut0, 0.0]
@@ -200,6 +185,7 @@ function simulate(
         "abstol" => solver.abstol,
         "dose_schedule" => [(d.time, d.amount) for d in spec.doses],
         "deterministic_output_grid" => true,
+        "event_semantics_version" => EVENT_SEMANTICS_VERSION,
     )
 
     return SimResult(Vector{Float64}(sol.t), states, observations, metadata)
