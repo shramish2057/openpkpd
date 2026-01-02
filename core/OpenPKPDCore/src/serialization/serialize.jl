@@ -73,6 +73,16 @@ function serialize_execution(;
         artifact["pd_spec"] = _serialize_pd_spec(pd_spec)
     end
 
+    mode = "pk"
+    if pd_spec !== nothing
+        if pd_spec.kind isa DirectEmax
+            mode = "pk_then_pd"
+        elseif pd_spec.kind isa IndirectResponseTurnover
+            mode = "pkpd_coupled"
+        end
+    end
+    artifact["execution_mode"] = mode
+
     return artifact
 end
 

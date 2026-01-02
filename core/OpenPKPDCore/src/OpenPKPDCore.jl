@@ -13,6 +13,7 @@ include("pd/indirect_response_turnover.jl")
 
 include("serialization/schema.jl")
 include("serialization/serialize.jl")
+include("serialization/deserialize.jl")
 
 include("engine/semantics.jl")
 include("engine/solver_semantics.jl")
