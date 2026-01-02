@@ -3,13 +3,6 @@ using SciMLBase
 
 export validate, _ode_onecomp_oral_first_order!, _observe_conc_onecomp_oral_first_order
 
-function _require_positive(name::String, x::Float64)
-    if !(x > 0.0)
-        error("Expected positive value for $(name), got $(x)")
-    end
-    return nothing
-end
-
 function validate(spec::ModelSpec{OneCompOralFirstOrder,OneCompOralFirstOrderParams})
     Ka = spec.params.Ka
     CL = spec.params.CL

@@ -3,13 +3,6 @@ using SciMLBase
 
 export validate, _ode_onecomp_ivbolus!
 
-function _require_positive(name::String, x::Float64)
-    if !(x > 0.0)
-        error("Expected positive value for $(name), got $(x)")
-    end
-    return nothing
-end
-
 function validate(spec::ModelSpec{OneCompIVBolus,OneCompIVBolusParams})
     CL = spec.params.CL
     V = spec.params.V

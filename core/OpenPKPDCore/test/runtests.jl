@@ -30,7 +30,7 @@ end
 
     for (i, t) in enumerate(res.t)
         c_ref = analytic_onecomp_ivbolus_conc(t, spec.doses, CL, V)
-        @test isapprox(res.conc[i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
     end
 end
 
@@ -55,7 +55,7 @@ end
             continue  # skip discontinuity (left-continuous solver output)
         end
         c_ref = analytic_onecomp_ivbolus_conc(t, spec.doses, CL, V)
-        @test isapprox(res.conc[i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
     end
 end
 
@@ -80,7 +80,7 @@ end
             continue
         end
         c_ref = analytic_onecomp_ivbolus_conc(t, spec.doses, CL, V)
-        @test isapprox(res.conc[i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
     end
 end
 
@@ -124,7 +124,7 @@ end
 
     for (i, t) in enumerate(res.t)
         c_ref = analytic_onecomp_oral_first_order_conc(t, spec.doses, Ka, CL, V)
-        @test isapprox(res.conc[i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
     end
 end
 
@@ -147,6 +147,60 @@ end
 
     for (i, t) in enumerate(res.t)
         c_ref = analytic_onecomp_oral_first_order_conc(t, spec.doses, Ka, CL, V)
-        @test isapprox(res.conc[i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
+    end
+end
+
+@testset "State outputs are present and aligned" begin
+    spec = ModelSpec(
+        OneCompOralFirstOrder(),
+        "state_presence",
+        OneCompOralFirstOrderParams(1.0, 3.0, 30.0),
+        [DoseEvent(0.0, 100.0)],
+    )
+
+    grid = SimGrid(0.0, 12.0, collect(0.0:1.0:12.0))
+    solver = SolverSpec(:Tsit5, 1e-9, 1e-11, 10^7)
+
+    res = simulate(spec, grid, solver)
+
+    @test haskey(res.states, :A_gut)
+    @test haskey(res.states, :A_central)
+    @test haskey(res.observations, :conc)
+
+    for v in values(res.states)
+        @test length(v) == length(res.t)
+    end
+end
+
+function direct_emax(C::Float64, E0::Float64, Emax::Float64, EC50::Float64)
+    return E0 + (Emax * C) / (EC50 + C)
+end
+
+@testset "PKPD coupling with DirectEmax using IV bolus analytic reference" begin
+    pk = ModelSpec(
+        OneCompIVBolus(), "pk_iv", OneCompIVBolusParams(5.0, 50.0), [DoseEvent(0.0, 100.0)]
+    )
+
+    grid = SimGrid(0.0, 24.0, collect(0.0:0.5:24.0))
+    solver = SolverSpec(:Tsit5, 1e-10, 1e-12, 10^7)
+
+    pd = PDSpec(DirectEmax(), "pd_emax", DirectEmaxParams(10.0, 40.0, 0.8), :conc, :effect)
+
+    res = simulate_pkpd(pk, pd, grid, solver)
+
+    @test haskey(res.observations, :conc)
+    @test haskey(res.observations, :effect)
+    @test length(res.observations[:effect]) == length(res.t)
+
+    CL = pk.params.CL
+    V = pk.params.V
+
+    for (i, t) in enumerate(res.t)
+        c_ref = analytic_onecomp_ivbolus_conc(t, pk.doses, CL, V)
+        e_ref = direct_emax(c_ref, pd.params.E0, pd.params.Emax, pd.params.EC50)
+
+        @test isapprox(res.observations[:conc][i], c_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(res.observations[:effect][i], e_ref; rtol=1e-10, atol=1e-12)
     end
 end

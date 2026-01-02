@@ -108,6 +108,10 @@ function simulate(
     A = [u[1] for u in sol.u]
     C = [a / V for a in A]
 
+    states = Dict(:A_central => A)
+
+    observations = Dict(:conc => C)
+
     metadata = Dict{String,Any}(
         "engine_version" => "0.1.0",
         "model" => "OneCompIVBolus",
@@ -118,7 +122,7 @@ function simulate(
         "deterministic_output_grid" => true,
     )
 
-    return SimResult(Vector{Float64}(sol.t), A, C, metadata)
+    return SimResult(Vector{Float64}(sol.t), states, observations, metadata)
 end
 
 function simulate(
@@ -184,6 +188,10 @@ function simulate(
     Acent = [u[2] for u in sol.u]
     C = [a / V for a in Acent]
 
+    states = Dict(:A_gut => Agut, :A_central => Acent)
+
+    observations = Dict(:conc => C)
+
     metadata = Dict{String,Any}(
         "engine_version" => "0.1.0",
         "model" => "OneCompOralFirstOrder",
@@ -194,7 +202,5 @@ function simulate(
         "deterministic_output_grid" => true,
     )
 
-    # For now SimResult.amount stores the central amount for multi-state models
-    # We keep this convention explicit and will formalize output structs later.
-    return SimResult(Vector{Float64}(sol.t), Acent, C, metadata)
+    return SimResult(Vector{Float64}(sol.t), states, observations, metadata)
 end
