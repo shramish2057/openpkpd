@@ -53,7 +53,7 @@ function replay_and_compare_artifact(expected_path::String, actual_path::String)
 end
 
 function main()
-    base = "use_cases/fih_dose_exploration"
+    base = "docs/examples/use_cases/fih_dose_exploration"
 
     # Compare metrics
     compare_metrics(

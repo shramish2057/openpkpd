@@ -1,33 +1,37 @@
-# PKPD biomarker turnover
+# PKPD Biomarker Turnover
 
-This use case models exposure driven biomarker suppression using a coupled PKPD indirect response turnover model.
+This use case models exposure-driven biomarker suppression using a coupled PKPD indirect response turnover model.
 
-Purpose:
-- Validate coupled PKPD, regimen comparison, and IOV behavior under realistic workflows.
-- Provide a reproducible, replayable contract for response metrics used in decision making.
+## Purpose
 
-PK model:
-- One-compartment IV bolus
+- Validate coupled PKPD, regimen comparison, and IOV behavior under realistic workflows
+- Provide a reproducible, replayable contract for response metrics used in decision making
 
-PD model:
-- Indirect response turnover
-- Baseline R0 = Kin / Kout
-- Drug effect driven by concentration with an inhibitory Emax form
+## Models
 
-Scenarios:
-- QD dosing: 100 mg at 0, 24, 48
-- BID dosing: 50 mg at 0, 12, 24, 36, 48, 60
-- Each scenario is simulated in two modes:
-  - No IOV
-  - IOV on CL across occasions
+**PK Model:** One-compartment IV bolus (CL=10 L/h, V=50 L typical)
 
-Outputs:
-- Mean and quantile response summaries across population
-- Decision metrics on mean response:
-  - Emin
-  - Time below threshold (80 percent of baseline)
-  - Suppression AUC (baseline - response)
+**PD Model:** Indirect response turnover
+- Baseline R0 = Kin / Kout = 100
+- Drug effect: inhibitory Emax (Imax=0.9, IC50=5)
 
-Validation:
-- Generated artifacts are compared against committed expected artifacts.
-- Metrics are compared with strict tolerance.
+## Scenarios
+
+| Regimen | Doses |
+|---------|-------|
+| QD | 100 mg at 0, 24, 48 h |
+| BID | 50 mg at 0, 12, 24, 36, 48, 60 h |
+
+Each scenario runs with and without IOV on CL across occasions.
+
+## Outputs
+
+- Population artifacts with mean and quantile response summaries
+- Decision metrics: Emin, time below 80% baseline, suppression AUC
+
+## Running
+
+```bash
+julia docs/examples/use_cases/pkpd_biomarker_turnover/run.jl
+julia docs/examples/use_cases/pkpd_biomarker_turnover/validate.jl
+```

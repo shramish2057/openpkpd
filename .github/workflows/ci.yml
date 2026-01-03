@@ -50,6 +50,26 @@ jobs:
         run: |
           docs/build_docs.sh
 
+      - name: Use case (FIH dose exploration)
+        shell: bash
+        run: |
+          docs/examples/use_cases/fih_dose_exploration/run_and_validate.sh
+
+      - name: Use case (PKPD biomarker turnover)
+        shell: bash
+        run: |
+          docs/examples/use_cases/pkpd_biomarker_turnover/run_and_validate.sh
+
+      - name: Real-world study (theophylline theo_sd)
+        shell: bash
+        run: |
+          docs/examples/real_world_validation/datasets/theophylline_theo_sd/run_and_validate.sh
+
+      - name: Real-world study (theophylline theo_md multiple dose)
+        shell: bash
+        run: |
+          docs/examples/real_world_validation/datasets/theophylline_theo_md/run_and_validate.sh
+
       - name: Check version consistency
         shell: bash
         run: |

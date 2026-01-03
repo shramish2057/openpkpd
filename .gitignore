@@ -86,6 +86,9 @@ docs/examples/output/*
 !docs/examples/output/.keep
 docs/examples/use_cases/*/output/*
 !docs/examples/use_cases/*/output/.keep
+docs/examples/real_world_validation/studies/*/output/*
+!docs/examples/real_world_validation/studies/*/output/.keep
+
 
 # -----------------------------------------------------------------------------
 # Temporary & Generated Files

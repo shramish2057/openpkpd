@@ -59,7 +59,8 @@ function run_one_dose(dose_mg::Float64)
 end
 
 function main()
-    mkpath("use_cases/fih_dose_exploration/output")
+    base_dir = "docs/examples/use_cases/fih_dose_exploration"
+    mkpath(joinpath(base_dir, "output"))
 
     dose_levels = [10.0, 30.0, 100.0, 300.0]
 
@@ -69,12 +70,12 @@ function main()
         pop, grid, solver, res, metrics = run_one_dose(d)
         push!(all_metrics, metrics)
 
-        out_art = "use_cases/fih_dose_exploration/output/pop_iv_" * string(Int(d)) * "mg.json"
+        out_art = joinpath(base_dir, "output", "pop_iv_" * string(Int(d)) * "mg.json")
         write_population_json(out_art; population_spec = pop, grid = grid, solver = solver, result = res)
         println("Wrote artifact: " * out_art)
     end
 
-    metrics_path = "use_cases/fih_dose_exploration/output/metrics.json"
+    metrics_path = joinpath(base_dir, "output", "metrics.json")
     open(metrics_path, "w") do io
         JSON.print(io, all_metrics, 2)
     end
