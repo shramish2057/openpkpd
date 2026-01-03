@@ -17,6 +17,7 @@ include("serialization/deserialize.jl")
 
 include("engine/semantics.jl")
 include("engine/solver_semantics.jl")
+include("engine/semantics_fingerprint.jl")
 include("engine/events.jl")
 include("engine/solve.jl")
 include("engine/pkpd.jl")

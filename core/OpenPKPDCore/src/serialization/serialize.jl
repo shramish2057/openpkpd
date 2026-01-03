@@ -82,6 +82,7 @@ function serialize_execution(;
         end
     end
     artifact["execution_mode"] = mode
+    artifact["semantics_fingerprint"] = semantics_fingerprint()
 
     return artifact
 end

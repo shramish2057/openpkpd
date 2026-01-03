@@ -41,6 +41,25 @@ end
 function validate_one(path::String)
     artifact = _load_json(path)
 
+    if haskey(artifact, "semantics_fingerprint")
+        current = semantics_fingerprint()
+        stored = Dict{String, Any}(artifact["semantics_fingerprint"])
+
+        for (k, v) in current
+            if !haskey(stored, k)
+                error("Stored semantics fingerprint missing key $(k) in $(path)")
+            end
+            if String(stored[k]) != String(v)
+                error(
+                    "Semantics version mismatch for $(k) in $(path). " *
+                    "Stored=$(stored[k]), Current=$(v). " *
+                    "Golden update requires intentional semantics bump."
+                )
+            end
+        end
+    end
+
+
     schema = String(artifact["artifact_schema_version"])
     if schema != ARTIFACT_SCHEMA_VERSION
         error("Artifact schema version mismatch in $(path). Expected $(ARTIFACT_SCHEMA_VERSION), got $(schema)")

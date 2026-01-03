@@ -29,4 +29,5 @@ jobs:
         shell: bash
         run: |
           julia validation/scripts/run_golden_validation.jl
+          
 

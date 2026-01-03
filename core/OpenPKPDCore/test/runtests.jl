@@ -585,3 +585,11 @@ end
         )
     end
 end
+
+@testset "Semantics fingerprint is complete" begin
+    fp = semantics_fingerprint()
+
+    @test haskey(fp, "event_semantics_version")
+    @test haskey(fp, "solver_semantics_version")
+    @test haskey(fp, "artifact_schema_version")
+end
