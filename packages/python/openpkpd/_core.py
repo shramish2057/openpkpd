@@ -80,9 +80,9 @@ def _detect_repo_root(start: Optional[Path] = None) -> Path:
     """Detect the OpenPKPD repository root directory."""
     here = (start or Path(__file__)).resolve()
     for p in [here] + list(here.parents):
-        if (p / "core" / "OpenPKPDCore" / "Project.toml").exists():
+        if (p / "packages" / "core" / "Project.toml").exists():
             return p
-    raise RuntimeError("Could not locate repo root (core/OpenPKPDCore/Project.toml not found).")
+    raise RuntimeError("Could not locate repo root (packages/core/Project.toml not found).")
 
 
 def init_julia(repo_root: Optional[Union[str, Path]] = None) -> None:
@@ -106,7 +106,7 @@ def init_julia(repo_root: Optional[Union[str, Path]] = None) -> None:
         return
 
     root = Path(repo_root).resolve() if repo_root else _detect_repo_root()
-    core_project = root / "core" / "OpenPKPDCore"
+    core_project = root / "packages" / "core"
 
     from juliacall import Main as jl  # type: ignore
 

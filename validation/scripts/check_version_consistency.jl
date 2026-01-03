@@ -1,6 +1,6 @@
 using OpenPKPDCore
 
-root = normpath(joinpath(@__DIR__, ".."))
+root = normpath(joinpath(@__DIR__, "..", ".."))
 version_file = joinpath(root, "VERSION")
 
 v = strip(read(version_file, String))

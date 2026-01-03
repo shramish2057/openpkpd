@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("core/OpenPKPDCore")
+Pkg.activate("packages/core")
 Pkg.instantiate()
 
 using OpenPKPDCore

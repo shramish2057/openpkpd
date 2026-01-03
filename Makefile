@@ -38,11 +38,11 @@ install: install-julia install-python
 
 install-julia:
 	@echo "Installing Julia dependencies..."
-	julia --project=core/OpenPKPDCore -e 'using Pkg; Pkg.instantiate()'
+	julia --project=packages/core -e 'using Pkg; Pkg.instantiate()'
 
 install-python:
 	@echo "Installing Python dependencies..."
-	cd python && python3 -m pip install -e .[dev]
+	cd packages/python && python3 -m pip install -e .[dev]
 
 install-docs:
 	@echo "Installing documentation dependencies..."
@@ -60,31 +60,31 @@ test-all: test validate
 
 test-julia:
 	@echo "Running Julia tests..."
-	julia --project=core/OpenPKPDCore -e 'using Pkg; Pkg.test()'
+	julia --project=packages/core -e 'using Pkg; Pkg.test()'
 
 test-python:
 	@echo "Running Python tests..."
-	cd python && python3 -m pytest tests/ -v
+	cd packages/python && python3 -m pytest tests/ -v
 
 test-nca:
 	@echo "Running NCA tests..."
-	cd python && python3 -m pytest tests/test_nca.py -v
+	cd packages/python && python3 -m pytest tests/test_nca.py -v
 
 test-trial:
 	@echo "Running trial simulation tests..."
-	cd python && python3 -m pytest tests/test_trial.py -v
+	cd packages/python && python3 -m pytest tests/test_trial.py -v
 
 test-viz:
 	@echo "Running visualization tests..."
-	cd python && python3 -m pytest tests/test_viz.py -v 2>/dev/null || echo "No viz tests found"
+	cd packages/python && python3 -m pytest tests/test_viz.py -v 2>/dev/null || echo "No viz tests found"
 
 test-replay:
 	@echo "Running replay tests..."
-	cd python && python3 -m pytest tests/test_replay.py -v
+	cd packages/python && python3 -m pytest tests/test_replay.py -v
 
 test-simulate:
 	@echo "Running simulation tests..."
-	cd python && python3 -m pytest tests/test_simulate.py -v
+	cd packages/python && python3 -m pytest tests/test_simulate.py -v
 
 # ============================================================================
 # Validation
@@ -92,13 +92,13 @@ test-simulate:
 
 validate:
 	@echo "Validating golden artifacts..."
-	./bin/openpkpd validate-golden
+	./packages/cli/bin/openpkpd validate-golden
 
 validate-golden: validate
 
 generate-golden:
 	@echo "Generating golden artifacts..."
-	julia --project=core/OpenPKPDCore validation/scripts/generate_golden_artifacts.jl
+	julia --project=packages/core validation/scripts/generate_golden_artifacts.jl
 
 # ============================================================================
 # Documentation
@@ -125,18 +125,18 @@ lint: lint-python
 
 lint-python:
 	@echo "Linting Python code..."
-	cd python && python3 -m ruff check openpkpd/ tests/ || true
-	cd python && python3 -m mypy openpkpd/ --ignore-missing-imports || true
+	cd packages/python && python3 -m ruff check openpkpd/ tests/ || true
+	cd packages/python && python3 -m mypy openpkpd/ --ignore-missing-imports || true
 
 # ============================================================================
 # CLI
 # ============================================================================
 
 cli-help:
-	./bin/openpkpd help
+	./packages/cli/bin/openpkpd help
 
 cli-version:
-	./bin/openpkpd version
+	./packages/cli/bin/openpkpd version
 
 # ============================================================================
 # Development
@@ -148,7 +148,7 @@ dev-setup: install
 smoke-test:
 	@echo "Running smoke tests..."
 	./validation/scripts/smoke_cli.sh
-	./python/scripts/smoke_python.sh 2>/dev/null || true
+	./packages/python/scripts/smoke_python.sh 2>/dev/null || true
 
 # ============================================================================
 # Cleanup
@@ -157,13 +157,13 @@ smoke-test:
 clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf site/
-	rm -rf python/.pytest_cache/
-	rm -rf python/__pycache__/
-	rm -rf python/openpkpd/__pycache__/
-	rm -rf python/openpkpd/**/__pycache__/
-	rm -rf python/*.egg-info/
+	rm -rf packages/python/.pytest_cache/
+	rm -rf packages/python/__pycache__/
+	rm -rf packages/python/openpkpd/__pycache__/
+	rm -rf packages/python/openpkpd/**/__pycache__/
+	rm -rf packages/python/*.egg-info/
 	rm -rf .pytest_cache/
-	rm -rf core/OpenPKPDCore/.pytest_cache/
+	rm -rf packages/core/.pytest_cache/
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -type d -delete
 	@echo "Clean complete"

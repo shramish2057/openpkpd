@@ -9,11 +9,11 @@ echo "Running Julia docs examples"
 julia docs/examples/julia/01_pk_iv_bolus.jl
 
 echo "Running Python docs examples"
-python3 -m pip install -e python
+python3 -m pip install -e packages/python
 python3 docs/examples/python/01_replay_golden.py
 
 echo "Replaying generated doc artifacts"
-./bin/openpkpd replay --artifact docs/examples/output/01_pk_iv_bolus.json
+./packages/cli/bin/openpkpd replay --artifact docs/examples/output/01_pk_iv_bolus.json
 
 echo "Validating doc outputs metadata"
 julia docs/examples/validate_outputs.jl

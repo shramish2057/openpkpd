@@ -1,4 +1,4 @@
 using JuliaFormatter
 
-format("core/OpenPKPDCore/src")
-format("core/OpenPKPDCore/test")
+format("packages/core/src")
+format("packages/core/test")

@@ -5,8 +5,8 @@
   </p>
   <p align="center">
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-    <a href="https://julialang.org/"><img src="https://img.shields.io/badge/Julia-1.9+-purple.svg" alt="Julia"></a>
-    <a href="https://python.org/"><img src="https://img.shields.io/badge/Python-3.9+-blue.svg" alt="Python"></a>
+    <a href="https://julialang.org/"><img src="https://img.shields.io/badge/Julia-1.10+-purple.svg" alt="Julia"></a>
+    <a href="https://python.org/"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   </p>
   <p align="center">
     <a href="#features">Features</a> •
@@ -27,10 +27,13 @@
 
 | Category | Features |
 |----------|----------|
-| **PK Models** | One-compartment IV bolus, oral first-order absorption |
-| **PD Models** | Direct Emax, indirect response turnover |
+| **PK Models** | One/Two/Three-compartment IV & oral, transit absorption, Michaelis-Menten |
+| **PD Models** | Direct Emax, sigmoid Emax, biophase equilibration, indirect response |
 | **Population** | IIV, IOV, static & time-varying covariates |
+| **NCA** | FDA/EMA-compliant non-compartmental analysis |
+| **Trial Simulation** | Parallel, crossover, dose-escalation, bioequivalence designs |
 | **Sensitivity** | Single-subject and population-level analysis |
+| **Visualization** | Matplotlib and Plotly backends |
 | **Interfaces** | Julia API, Python bindings, CLI |
 | **Reproducibility** | Versioned artifacts with deterministic replay |
 
@@ -43,16 +46,16 @@ git clone https://github.com/openpkpd/openpkpd.git
 cd openpkpd
 
 # Install dependencies
-julia --project=core/OpenPKPDCore -e 'using Pkg; Pkg.instantiate()'
+julia --project=packages/core -e 'using Pkg; Pkg.instantiate()'
 
 # Verify installation
-julia --project=core/OpenPKPDCore -e 'using OpenPKPDCore; println("v", OPENPKPD_VERSION)'
+julia --project=packages/core -e 'using OpenPKPDCore; println("v", OPENPKPD_VERSION)'
 ```
 
 ### Python (Optional)
 
 ```bash
-cd python
+cd packages/python
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -61,7 +64,7 @@ pip install -e .
 ### CLI
 
 ```bash
-./bin/openpkpd version
+./packages/cli/bin/openpkpd version
 ```
 
 ## Quick Start
@@ -107,44 +110,48 @@ print(result["observations"]["conc"])
 
 ```bash
 # Check version
-./bin/openpkpd version
+./packages/cli/bin/openpkpd version
 
 # Replay an artifact
-./bin/openpkpd replay --artifact validation/golden/pk_iv_bolus.json
+./packages/cli/bin/openpkpd replay --artifact validation/golden/pk_iv_bolus.json
 
 # Validate all golden artifacts
-./bin/openpkpd validate-golden
+./packages/cli/bin/openpkpd validate-golden
 ```
 
 ## Repository Structure
 
 ```
 openpkpd/
-├── core/OpenPKPDCore/    # Core Julia package
-│   ├── src/              # Source code
-│   └── test/             # Test suite
-├── cli/OpenPKPDCLI/      # Command-line interface
-├── python/               # Python bindings
-├── docs/                 # Documentation (MkDocs)
-│   └── examples/         # Executable examples
+├── packages/
+│   ├── core/             # Julia simulation engine
+│   │   ├── src/          # Source code
+│   │   └── test/         # Test suite
+│   ├── python/           # Python bindings
+│   │   ├── openpkpd/     # Package code
+│   │   └── tests/        # Python tests
+│   └── cli/              # Command-line interface
+│       ├── src/          # CLI source
+│       └── bin/          # Entry point
 ├── validation/           # Golden artifacts
 │   ├── golden/           # Reference outputs
 │   └── scripts/          # Validation runners
-├── scripts/              # Development tools
-└── bin/                  # CLI entry point
+├── docs/                 # Documentation (MkDocs)
+│   └── examples/         # Executable examples
+└── scripts/              # Development tools
 ```
 
 ## Testing
 
 ```bash
 # Julia unit tests
-julia --project=core/OpenPKPDCore -e 'using Pkg; Pkg.test()'
+julia --project=packages/core -e 'using Pkg; Pkg.test()'
 
 # Golden artifact validation
-./bin/openpkpd validate-golden
+./packages/cli/bin/openpkpd validate-golden
 
 # Python tests
-cd python && source .venv/bin/activate && pytest tests/
+cd packages/python && source .venv/bin/activate && pytest tests/
 
 # Documentation build
 mkdocs build --strict
