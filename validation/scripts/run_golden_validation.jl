@@ -41,6 +41,69 @@ end
 function validate_one(path::String)
     artifact = _load_json(path)
 
+        atype = "single"
+    if haskey(artifact, "artifact_type")
+        atype = String(artifact["artifact_type"])
+    end
+
+    if atype == "population"
+        # Fingerprint enforcement if present
+        if haskey(artifact, "semantics_fingerprint")
+            current = semantics_fingerprint()
+            storedfp = Dict{String, Any}(artifact["semantics_fingerprint"])
+            for (k, v) in current
+                if !haskey(storedfp, k)
+                    error("Stored semantics fingerprint missing key $(k) in $(path)")
+                end
+                if String(storedfp[k]) != String(v)
+                    error(
+                        "Semantics version mismatch for $(k) in $(path). " *
+                        "Stored=$(storedfp[k]), Current=$(v). Golden update requires intentional semantics bump."
+                    )
+                end
+            end
+        end
+
+        replay = replay_population_execution(artifact)
+
+        stored = artifact["population_result"]
+        stored_meta = Dict{String, Any}(stored["metadata"])
+        stored_params = stored["params"]
+        stored_inds = stored["individuals"]
+
+        if length(stored_inds) != length(replay.individuals)
+            error("Population size mismatch in $(path)")
+        end
+
+        # Compare each individual result series
+        for i in 1:length(replay.individuals)
+            s_i = stored_inds[i]
+            stored_t = [Float64(x) for x in s_i["t"]]
+            if replay.individuals[i].t != stored_t
+                error("Time grid mismatch for individual $(i) in $(path)")
+            end
+
+            stored_states = Dict{String, Any}(s_i["states"])
+            stored_obs = Dict{String, Any}(s_i["observations"])
+
+            _compare_dict_of_series(stored_states, replay.individuals[i].states, "pop.states[$i]")
+            _compare_dict_of_series(stored_obs, replay.individuals[i].observations, "pop.observations[$i]")
+        end
+
+        # Enforce semantics version keys in metadata
+        if !haskey(stored_meta, "event_semantics_version")
+            error("Stored population artifact missing event_semantics_version in $(path)")
+        end
+        if !haskey(stored_meta, "solver_semantics_version")
+            error("Stored population artifact missing solver_semantics_version in $(path)")
+        end
+
+        _require_equal(String(stored_meta["event_semantics_version"]), EVENT_SEMANTICS_VERSION, "event_semantics_version")
+        _require_equal(String(stored_meta["solver_semantics_version"]), SOLVER_SEMANTICS_VERSION, "solver_semantics_version")
+
+        return true
+    end
+
     if haskey(artifact, "semantics_fingerprint")
         current = semantics_fingerprint()
         stored = Dict{String, Any}(artifact["semantics_fingerprint"])
